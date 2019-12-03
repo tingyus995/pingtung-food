@@ -1,0 +1,22 @@
+{
+  "name": "pingtung-food",
+  "version": "1.0.0",
+  "description": "A service that allows students of NPTU to discovery the food available in PingTung city and place the older on the platform.",
+  "main": "index.js",
+  "scripts": {
+    "test": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tingyus995/pingtung-food.git"
+  },
+  "keywords": [
+    "food"
+  ],
+  "author": "TingYuYan",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/tingyus995/pingtung-food/issues"
+  },
+  "homepage": "https://github.com/tingyus995/pingtung-food#readme"
+}

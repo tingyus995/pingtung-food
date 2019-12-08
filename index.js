@@ -8,33 +8,7 @@ db.once('open', function() {
     console.log("Database connected.");
 });
 
-let userSchema = new mongoose.Schema({
-    name: String,
-    email: String,
-    password : String,
 
-    historyOrders : [{
-        food : {
-            name : String,
-            amount : Number,
-            price: Number
-        },
-        status : String, // finished | abandoned | rejected
-        message : String
-    }]    
-});
-
-userSchema.methods.generateAuthToken = async function() {
-    // Generate an auth token for the user
-    const user = this
-    const token = jwt.sign({_id: user._id}, JWT_KEY)
-    user.tokens = user.tokens.concat({token})
-    await user.save()
-    return token
-}
-
-
-let User = mongoose.model('User', userSchema);
 
 /*let TingYu = new User({
     name : "TingYuYan",
@@ -58,6 +32,9 @@ io.on('connection', client => {
 
 
   });
+
+  client.on('')
+
   client.on('disconnect', () => { /* … */ });
 });
 server.listen(3000);

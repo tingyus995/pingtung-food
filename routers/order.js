@@ -54,6 +54,31 @@ router.get('/',stu_auth, (req, res) => {
 
 })
 
+router.get('/shop',shop_auth, (req, res) => {
+
+
+    let orders = Order.aggregate([
+        
+        {$lookup: { from: 'students', localField: 'studentId', foreignField: '_id', as: 'student' }},
+        {$match : { shopId : req.user._id}}
+        /*{$project : {"items":1,"price":1, "tags":1,"picture":1, "shop.name":1, "shopId":1}}*/
+        ])
+
+        orders.exec((err, result) => {
+               
+
+        result.map(r =>{
+            r.student = r.student[0];
+            return r;
+        })
+        
+        res.status(201).send(result);
+    })
+
+
+})
+
+
 /*router.post('/login', async(req, res) => {
 	console.log("debug login");
     //Login a registered user

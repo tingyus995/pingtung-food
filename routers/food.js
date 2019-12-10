@@ -1,10 +1,28 @@
 const express = require('express')
 const Food = require('../models/Food')
-const auth = require('../middleware/shop_auth')
+const shop_auth = require('../middleware/shop_auth')
 
 const router = express.Router()
 
-router.post('/', auth, async (req, res) => {
+router.put('/', shop_auth, async (req, res) => {
+    // Create a new food
+    console.log("debug");
+    try {
+        req.body.shopId = req.user._id;
+
+        const food = await Food.findOneAndUpdate({_id : req.body._id, shopId : req.user._id}, req.body, {
+            new: false
+          });
+        //const token = await food.generateAuthToken()
+        res.status(201).send({ status : 'success' })
+    } catch (error) {
+        console.log(error);
+        res.status(400).send(error)
+    }
+})
+
+
+router.post('/', shop_auth, async (req, res) => {
     // Create a new food
     console.log("debug");
     try {
@@ -18,6 +36,8 @@ router.post('/', auth, async (req, res) => {
         res.status(400).send(error)
     }
 })
+
+
 
 router.get('/', (req, res) => {
     /*Food.find({
@@ -53,6 +73,41 @@ router.get('/', (req, res) => {
 
 
 })
+
+router.get('/shop', shop_auth, (req, res) => {
+    /*Food.find({
+        $lookup:
+     {
+       from: "Shop",
+       localField:"shopId",
+       foreignField: "name",
+       as: "shop"
+     }
+    },(err,r) => {
+        res.status(201).send(r);
+    })*/
+
+    let foods = Food.aggregate([
+        
+        {$lookup: { from: 'shops', localField: 'shopId', foreignField: '_id', as: 'shop' }},
+        {$match : {shopId : req.user._id}},
+        {$project : {"name":1,"price":1, "tags":1,"picture":1, "shop.name":1, "shopId":1}}
+        ])
+
+    foods.exec((err, result) => {
+               
+
+        result.map(r =>{
+            r.shop = r.shop[0].name;
+            return r;
+        })
+        
+        
+
+        res.status(201).send(result);
+    })
+})
+
 
 /*router.post('/login', async(req, res) => {
 	console.log("debug login");

@@ -3,44 +3,50 @@ const validator = require('validator');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-const orderSchema = new mongoose.Schema({
-    foodName: {
+var ObjectId = mongoose.Schema.Types.ObjectId;
+
+const itemSchema = new mongoose.Schema({
+    name : {
         type: String,
         required : true
-    },
-    foodType : {
-        type : String,
-        required : true
-    },
-    email: {
-        type: String,
-        required : true,
-        unique: true,
-        lowercase : true,
-        validate: value => {
-            if (!validator.isEmail(value)) {
-                throw new Error({error: 'Invalid Email address'})
-            }
-        }
-    },
-    password : {
-        type: String,
-        required : true,
-        minlength : 5
     },
 
-    historyOrders : [{
-        food : {
-            name : String,
-            amount : Number,
-            price: Number
-        },
-        status : String, // finished | abandoned | rejected
-        message : String
-    }]    
+    price : {
+        type : Number,
+        required: true
+    },
+
+    amount : {
+        type : Number,
+        required: true
+    }
+
+})
+
+const orderSchema = new mongoose.Schema({
+    shopId: {
+        type : ObjectId,
+        required: true
+    },
+    studentId: {
+        type: ObjectId,
+        required : true
+    },
+    items : {
+        type : Array,
+        required : true
+    },
+    status : {
+        type : String,        
+        default : "created"
+    },
+    createdAt:{
+        type : Date,
+        default : new Date()
+    }        
 });
 
-userSchema.pre('save', async function (next) {
+/*userSchema.pre('save', async function (next) {
     // Hash the password before saving the user model
     const user = this
     if (user.isModified('password')) {
@@ -69,7 +75,8 @@ userSchema.statics.findByCredentials = async (email, password) => {
         throw new Error({ error: 'Invalid login credentials' })
     }
     return user
-}
+}*/
 
 
-let User = mongoose.model('User', userSchema);
+const Order = mongoose.model('Order', orderSchema);
+module.exports = Order

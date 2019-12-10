@@ -1,16 +1,17 @@
 const express = require('express')
-const Food = require('../models/Food')
-const auth = require('../middleware/shop_auth')
+const Order = require('../models/Order')
+const shop_auth = require('../middleware/shop_auth')
+const stu_auth = require('../middleware/stu_auth')
 
 const router = express.Router()
 
-router.post('/', auth, async (req, res) => {
-    // Create a new food
+router.post('/', stu_auth, async (req, res) => {
+    // Create a new order
     console.log("debug");
     try {
-        req.body.shopId = req.user._id;
-        const food = new Food(req.body);
-        await food.save()
+        req.body.studentId = req.user._id;
+        const item = new Order(req.body);
+        await item.save()
         //const token = await food.generateAuthToken()
         res.status(201).send({ status : 'success' })
     } catch (error) {
@@ -32,7 +33,7 @@ router.get('/', (req, res) => {
         res.status(201).send(r);
     })*/
 
-    let foods = Food.aggregate([
+    let foods = Order.aggregate([
         
         {$lookup: { from: 'shops', localField: 'shopId', foreignField: '_id', as: 'shop' }},
         {$project : {"name":1,"price":1, "tags":1,"picture":1, "shop.name":1, "shopId":1}}

@@ -20,7 +20,7 @@ router.post('/', stu_auth, async (req, res) => {
     }
 })
 
-router.get('/', (req, res) => {
+router.get('/',stu_auth, (req, res) => {
     /*Food.find({
         $lookup:
      {
@@ -33,13 +33,14 @@ router.get('/', (req, res) => {
         res.status(201).send(r);
     })*/
 
-    let foods = Order.aggregate([
+    let orders = Order.aggregate([
         
         {$lookup: { from: 'shops', localField: 'shopId', foreignField: '_id', as: 'shop' }},
-        {$project : {"name":1,"price":1, "tags":1,"picture":1, "shop.name":1, "shopId":1}}
+        {$match : { studentId : req.user._id}}
+        /*{$project : {"items":1,"price":1, "tags":1,"picture":1, "shop.name":1, "shopId":1}}*/
         ])
 
-    foods.exec((err, result) => {
+        orders.exec((err, result) => {
                
 
         result.map(r =>{
@@ -47,8 +48,6 @@ router.get('/', (req, res) => {
             return r;
         })
         
-        
-
         res.status(201).send(result);
     })
 

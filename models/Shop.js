@@ -39,24 +39,24 @@ shopSchema.pre('save', async function (next) {
 shopSchema.methods.generateAuthToken = function() {
     // Generate an auth token for the user
     const user = this
-    const token = jwt.sign({_id: user._id, type: 'shop', created: new Date()}, process.env.JWT_KEY)    
+    const token = jwt.sign({name : user.name, email: user.email, _id: user._id, type: 'shop', created: new Date()}, process.env.JWT_KEY)    
     return token
 }
 
 shopSchema.statics.findByCredentials = async (email, password) => {
     // Search for a user by email and password.
-    const user = await User.findOne({ email} )
+    const user = await Shop.findOne({ email} )
     if (!user) {
-        throw new Error({ error: 'Invalid login credentials' })
+        throw { error: 'Invalid login credentials' }
     }
     const isPasswordMatch = await bcrypt.compare(password, user.password)
     if (!isPasswordMatch) {
-        throw new Error({ error: 'Invalid login credentials' })
+        throw { error: 'Invalid login credentials' }
     }
     return user
 }
 
 
-const Shop = mongoose.model('Student', shopSchema);
+const Shop = mongoose.model('Shop', shopSchema);
 
 module.exports = Shop

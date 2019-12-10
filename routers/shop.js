@@ -1,13 +1,13 @@
 const express = require('express')
-const Student = require('../models/Student')
-const auth = require('../middleware/stu_auth')
+const Shop = require('../models/Shop')
+const auth = require('../middleware/shop_auth')
 
 const router = express.Router()
 
 router.post('/', async (req, res) => {
     // Create a new user
     try {
-        const user = new Student(req.body)
+        const user = new Shop(req.body)
         await user.save()
         const token = await user.generateAuthToken()
         res.status(201).send({ user: user, token })
@@ -23,7 +23,7 @@ router.post('/login', async(req, res) => {
         const { email, password } = req.body
 	console.log("email:", email)
 	console.log("password:", password)
-        const user = await Student.findByCredentials(email, password)
+        const user = await Shop.findByCredentials(email, password)
         if (!user) {
             return res.status(401).send({error: 'Login failed! Check authentication credentials'})
         }
@@ -31,7 +31,7 @@ router.post('/login', async(req, res) => {
 	   console.log(token);
 	console.log("user");
 	console.log(user);
-        res.send({user: { type: 'student', _id: user._id, name: user.name, email: user.email}, token })
+        res.send({user: { type: 'shop', _id: user._id, name: user.name, email: user.email}, token })
     } catch (error) {
         res.status(400).send(error);
     }

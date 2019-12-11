@@ -36,7 +36,8 @@ router.get('/',stu_auth, (req, res) => {
     let orders = Order.aggregate([
         
         {$lookup: { from: 'shops', localField: 'shopId', foreignField: '_id', as: 'shop' }},
-        {$match : { studentId : req.user._id}}
+        {$match : { studentId : req.user._id}},
+        {$sort : { createdAt : -1}}
         /*{$project : {"items":1,"price":1, "tags":1,"picture":1, "shop.name":1, "shopId":1}}*/
         ])
 

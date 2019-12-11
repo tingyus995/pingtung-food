@@ -1,6 +1,7 @@
 const express = require('express')
 const Student = require('../models/Student')
 const auth = require('../middleware/stu_auth')
+const bcrypt = require('bcryptjs');
 
 const router = express.Router()
 
@@ -39,8 +40,39 @@ router.post('/login', async(req, res) => {
 
 router.get('/', auth, async(req, res) => {
     // View logged in user profile
+    req.user.password = ''
     res.send(req.user)
 })
+
+router.put('/changepasswd', auth, async (req, res) => {
+    // Create a new user
+    try {
+        //const user = new Shop(req.body)
+        //await user.save()
+        //const token = await user.generateAuthToken()
+        
+        const matched =  await bcrypt.compare(req.body.original_password, req.user.password);
+        
+        if(matched){
+            console.log("password matched.");
+            console.log(req.body.password);
+            await Student.findOneAndUpdate({_id : req.user._id}, {
+                password : await bcrypt.hash(req.body.password, 8)
+            }, {
+                new: false
+              });
+            console.log("updated");
+            res.status(201).send({ status : 'success'})
+        }else{
+            throw { message : "original password incorrect."}
+        }
+
+    } catch (error) {
+        console.log(error);
+        res.status(400).send(error)
+    }
+})
+
 
 /*router.post('/users/me/logout', auth, async (req, res) => {
     // Log user out of the application

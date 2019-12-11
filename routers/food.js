@@ -20,7 +20,26 @@ router.put('/', shop_auth, async (req, res) => {
         res.status(400).send(error)
     }
 })
+router.delete('/', shop_auth, async (req, res) => {
+    // Delete food
+    console.log("debug");
+    try {
+        //req.body.shopId = req.user._id;
 
+        console.log(req.body._id);
+
+        Food.findOneAndRemove({_id : req.body._id, shopId : req.user._id})
+        .exec((err,result) => {
+            if(err) console.log(err);;
+            console.log(result);
+            res.status(201).send({ status : 'success' })
+        });
+        //const token = await food.generateAuthToken()
+    } catch (error) {
+        console.log(error);
+        res.status(400).send(error)
+    }
+})
 
 router.post('/', shop_auth, async (req, res) => {
     // Create a new food

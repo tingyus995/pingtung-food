@@ -1,6 +1,7 @@
 const express = require('express')
 const Shop = require('../models/Shop')
 const auth = require('../middleware/shop_auth')
+const bcrypt = require('bcryptjs');
 
 const router = express.Router()
 
@@ -15,6 +16,56 @@ router.post('/', async (req, res) => {
         res.status(400).send(error)
     }
 })
+
+router.put('/', auth, async (req, res) => {
+    // Create a new user
+    try {
+        //const user = new Shop(req.body)
+        //await user.save()
+        //const token = await user.generateAuthToken()
+
+        const food = await Shop.findOneAndUpdate({_id : req.user._id}, {
+            name : req.body.name,
+            email : req.body.email
+        }, {
+            new: false
+          });
+        res.status(201).send({ status : 'success'})
+    } catch (error) {
+        res.status(400).send(error)
+    }
+})
+
+router.put('/changepasswd', auth, async (req, res) => {
+    // Create a new user
+    try {
+        //const user = new Shop(req.body)
+        //await user.save()
+        //const token = await user.generateAuthToken()
+        
+        const matched =  await bcrypt.compare(req.body.original_password, req.user.password);
+        
+        if(matched){
+            console.log("password matched.");
+            console.log(req.body.password);
+            await Shop.findOneAndUpdate({_id : req.user._id}, {
+                password : await bcrypt.hash(req.body.password, 8)
+            }, {
+                new: false
+              });
+            console.log("updated");
+            res.status(201).send({ status : 'success'})
+        }else{
+            throw { message : "original password incorrect."}
+        }
+
+    } catch (error) {
+        console.log(error);
+        res.status(400).send(error)
+    }
+})
+
+
 
 router.post('/login', async(req, res) => {
 	console.log("debug login");
@@ -39,6 +90,8 @@ router.post('/login', async(req, res) => {
 
 router.get('/', auth, async(req, res) => {
     // View logged in user profile
+    //delete req.user.password;
+    req.user.password = ''
     res.send(req.user)
 })
 

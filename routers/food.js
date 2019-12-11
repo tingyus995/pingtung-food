@@ -75,7 +75,7 @@ router.get('/', (req, res) => {
     let foods = Food.aggregate([
 
         { $lookup: { from: 'shops', localField: 'shopId', foreignField: '_id', as: 'shop' } },
-        { $project: {"likes" : 1, "name": 1, "price": 1, "tags": 1, "picture": 1, "shop.name": 1, "shopId": 1 } }
+        /*{ $project: {"likes" : 1, "name": 1, "price": 1, "tags": 1, "picture": 1, "shop.name": 1, "shopId": 1 } }*/
     ])
 
     foods.exec((err, result) => {
@@ -111,7 +111,7 @@ router.get('/shop', shop_auth, (req, res) => {
 
         { $lookup: { from: 'shops', localField: 'shopId', foreignField: '_id', as: 'shop' } },
         { $match: { shopId: req.user._id } },
-        { $project: { "name": 1, "price": 1, "tags": 1, "picture": 1, "shop.name": 1, "shopId": 1 } }
+        /*{ $project: { "name": 1, "price": 1, "tags": 1, "picture": 1, "shop.name": 1, "shopId": 1 } }*/
     ])
 
     foods.exec((err, result) => {

@@ -18,11 +18,11 @@ const foodSchema = new mongoose.Schema({
     
     createdAt : {
         type: Date,
-        default: new Date()
+        default: Date.now
     },
     modifiedAt : {
         type : Date,
-        default: new Date()
+        default: Date.now
     },
     likes : {
         type : Array,
@@ -38,6 +38,10 @@ const foodSchema = new mongoose.Schema({
     },
     shopId : {
         type : ObjectId
+    },
+    description:{
+        type : String,
+        default : ""
     }
 });
 

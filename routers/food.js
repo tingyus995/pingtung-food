@@ -1,4 +1,5 @@
 const express = require('express')
+const stream = require('stream')
 const Food = require('../models/Food')
 const shop_auth = require('../middleware/shop_auth')
 const student_auth = require('../middleware/stu_auth')
@@ -76,6 +77,33 @@ module.exports = (io, socketIDs) => {
     })
 
 
+    router.get('/img/:foodId', async (req, res) => {
+        console.log(req.params.foodId);
+        try{
+            const food = await Food.findOne({_id : req.params.foodId});
+            //console.log(food.picture);
+            let base64 = food.picture;
+            let re = /data:(image\/\w+);/;
+            let contentType = base64.match(re)[1];
+            //console.log(contentType);
+            var base64Data = base64.replace(/data:image\/\w+;base64,/, '');
+            var img = Buffer.from(base64Data, 'base64');
+            //console.log(base64Data);
+            res.writeHead(200, {
+              'Content-Type': contentType,
+              'Content-Length': img.length
+            });
+            res.end(img);
+            //res.status(201).send('ok');
+
+
+        }catch(e){
+            res.status(400).send(e);
+            console.log(e);
+        }
+    })
+
+
 
     router.get('/', (req, res) => {
         /*Food.find({
@@ -101,6 +129,7 @@ module.exports = (io, socketIDs) => {
 
             result.map(r => {
                 r.shop = r.shop[0];
+                r.picture = process.env.APP_ROOT + "/food/img/" + r._id;
                 return r;
             })
 
@@ -137,6 +166,7 @@ module.exports = (io, socketIDs) => {
 
             result.map(r => {
                 r.shop = r.shop[0];
+                r.picture = process.env.APP_ROOT + "/food/img/" + r._id;
                 return r;
             })
 

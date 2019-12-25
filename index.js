@@ -41,8 +41,8 @@ server.listen(port);
 app.use(cors())
 app.use(express.json())
 app.use('/student',studentRouter)
-app.use('/shop', shopRouter)
-app.use('/food',foodRouter)
+app.use('/shop', shopRouter(io, socketIDs))
+app.use('/food',foodRouter(io, socketIDs))
 app.use('/order', orderRouter(io, socketIDs))
 /*app.listen(port, () => {
     console.log(`Server running on port ${port}`)

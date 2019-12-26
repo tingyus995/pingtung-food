@@ -14,7 +14,8 @@ module.exports = (io, socketIDs) => {
             const user = new Shop(req.body)
             await user.save()
             const token = await user.generateAuthToken()
-            res.status(201).send({ user: user, token })
+            //res.status(201).send({ user: user, token })
+            res.send({ user: { type: 'shop', _id: user._id, name: user.name, email: user.email, status : user.status }, token })
         } catch (error) {
             res.status(400).send(error)
         }

@@ -1,5 +1,5 @@
 const express = require('express')
-const port = 3030
+const port = process.env.PORT || 3030
 const studentRouter = require('./routers/student')
 const shopRouter = require('./routers/shop')
 const foodRouter = require('./routers/food')

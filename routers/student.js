@@ -54,8 +54,8 @@ router.post('/code', async (req, res) => {
 
     console.log("sending email...");
     console.log(email);
-    email.send(data.email,"探索屏東美食註冊驗證碼","感謝您加入探索屏東美食的成員，以下是您的驗證碼：" + code);
-    res.send({status : 'ok'});    
+    email.send(data.email,"探索屏東美食註冊驗證碼","感謝您加入探索屏東美食的成員，以下是您的驗證碼：" + code + "。請不要告訴他人自己的驗證碼。若您未於本平台申請帳號，請忽略此訊息。");
+    res.send({status : 'ok'});
 })
 
 router.post('/vertification', async (req, res) => {
@@ -93,8 +93,12 @@ router.post('/vertification', async (req, res) => {
 
 router.post('/', async (req, res) => {
     // Create a new user
+    if(!vertificationCodes[req.body.user.email] === req.body.code){
+        res.status(400).send({status : 'error', msg : "Vertification code invalid."});
+        return;
+    }
     try {
-        const user = new Student(req.body)
+        const user = new Student(req.body.user)
         await user.save()
         const token = await user.generateAuthToken()
         //res.status(201).send({ user: user, token })

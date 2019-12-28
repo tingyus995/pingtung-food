@@ -15,7 +15,7 @@ module.exports = (io, socketIDs) => {
             await user.save()
             const token = await user.generateAuthToken()
             //res.status(201).send({ user: user, token })
-            res.send({ user: { type: 'shop', _id: user._id, name: user.name, email: user.email, status : user.status }, token })
+            res.send({ user: { type: 'shop', _id: user._id, name: user.name, email: user.email, status: user.status }, token })
         } catch (error) {
             res.status(400).send(error)
         }
@@ -35,6 +35,21 @@ module.exports = (io, socketIDs) => {
                 new: true
             });
             io.emit('shop_change', shop);
+
+
+            // notify shop itself
+            if (socketIDs[req.user._id]) {
+                socketIDs[req.user._id].forEach(sid => {
+                    io.to(sid).emit('shop_change_self', {
+                        _id: shop._id,
+                        name: shop.name,
+                        status: shop.status
+                    })
+                });
+            }
+
+
+
             res.status(201).send({ status: 'success' })
         } catch (error) {
             res.status(400).send(error)
@@ -91,6 +106,18 @@ module.exports = (io, socketIDs) => {
             name: shop.name,
             status: shop.status
         });
+        // notify shop itself
+        if (socketIDs[req.user._id]) {
+            socketIDs[req.user._id].forEach(sid => {
+                io.to(sid).emit('shop_change_self', {
+                    _id: shop._id,
+                    name: shop.name,
+                    status: shop.status
+                })
+            });
+        }
+
+
         //}
 
         res.status(201).send({ status: "success" });
@@ -142,7 +169,7 @@ module.exports = (io, socketIDs) => {
             console.log(token);
             console.log("user");
             console.log(user);
-            res.send({ user: { type: 'shop', _id: user._id, name: user.name, email: user.email, status : user.status }, token })
+            res.send({ user: { type: 'shop', _id: user._id, name: user.name, email: user.email, status: user.status }, token })
         } catch (error) {
             res.status(400).send(error);
         }

@@ -22,9 +22,9 @@ io.on('connection', socket => {
         try {
             const data = jwt.verify(token, process.env.JWT_KEY);
             console.log(data);
-            if(socketIDs[data._id]){
+            if (socketIDs[data._id]) {
                 socketIDs[data._id].push(socket.id);
-            }else{
+            } else {
                 socketIDs[data._id] = [socket.id];
             }
             console.log("after auth: ");
@@ -42,28 +42,31 @@ io.on('connection', socket => {
 
         let kv = Object.entries(socketIDs);
 
-        for(let i = 0; i < kv.length; ++i){
+        for (let i = 0; i < kv.length; ++i) {
             let item = kv[i];
 
             let id = item[0];
             let s_id = item[1];
 
             let idx = s_id.indexOf(socket.id);
-            
-            if(idx !== -1){
+
+            if (idx !== -1) {
                 userId = id;
                 idxToDelete = idx;
                 break;
             }
         }
-        
-        socketIDs[userId].splice(idxToDelete,1);
-        if(socketIDs[userId].length === 0){
-            delete socketIDs[userId];
+        if (userId !== -1) {
+            if (socketIDs[userId]) {
+                socketIDs[userId].splice(idxToDelete, 1);
+                if (socketIDs[userId].length === 0) {
+                    delete socketIDs[userId];
+                }
+                console.log("after deleting...");
+                console.log(socketIDs);
+                //delete socketIDs[Object.keys(socketIDs)[index]];
+            }
         }
-        console.log("after deleting...");
-        console.log(socketIDs);
-        //delete socketIDs[Object.keys(socketIDs)[index]];
     })
 
     socket.emit("hello", { msg: "Hello world!" });

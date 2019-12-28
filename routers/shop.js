@@ -1,17 +1,102 @@
 const express = require('express')
 const Shop = require('../models/Shop')
 const auth = require('../middleware/shop_auth')
+const email = require('../email')();
 const bcrypt = require('bcryptjs');
 
 
 module.exports = (io, socketIDs) => {
 
+    function getRandomInt(min, max) {
+        min = Math.ceil(min);
+        max = Math.floor(max);
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+
+    let vertificationCodes = {};
+
+
     const router = express.Router()
+
+
+    router.post('/code', async (req, res) => {
+        let data = req.body;
+
+
+        let re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        if (!data) {
+            res.status(400).send({ status: "error", msg: "No email provided." })
+            return;
+        }
+        if (!data.email) {
+            res.status(400).send({ status: "error", msg: "No email provided." })
+            return;
+        }
+
+        if (!re.test(data.email)) {
+            res.status(400).send({ status: "error", msg: "E-mail format invalid." })
+            return;
+        }
+
+        let code = getRandomInt(10000, 99999);
+        console.log("Code:" + code);
+
+        vertificationCodes[data.email] = code;
+
+        setTimeout(function () {
+            console.log("Deleting vertification code:");
+            console.log(data.email);
+            console.log(vertificationCodes[data.email]);
+            delete vertificationCodes[data.email];
+        }, 120 * 1000)
+
+        console.log("sending email...");
+        console.log(email);
+        email.send(data.email, "探索屏東美食註冊驗證碼", "感謝您加入探索屏東美食的店家合作夥伴，以下是您的驗證碼：" + code + "。請不要告訴他人自己的驗證碼。若您未於本平台申請帳號，請忽略此訊息。");
+        res.send({ status: 'ok' });
+    })
+
+
+    router.post('/vertification', async (req, res) => {
+        let data = req.body;
+        let re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        if (!data) {
+            res.status(400).send({ status: "error", msg: "No information provided." })
+            return;
+        }
+        if(!data.email){
+            res.status(400).send({ status: "error", msg: "No email provided." })
+            return;
+        }
+
+        if(!re.test(data.email)){
+            res.status(400).send({ status: "error", msg: "E-mail format invalid." })
+            return;
+        }
+        if(!data.code){
+            res.status(400).send({ status: "error", msg: "No code provided." })
+            return;
+        }
+    
+        if(vertificationCodes[data.email] === parseInt(data.code)){
+            res.send({status : 'ok'});
+        }else{
+            res.status(400).send({status : 'error', msg : "Vertification code incorrect"});
+        }    
+    })
+
+
+
 
     router.post('/', async (req, res) => {
         // Create a new user
+        if(!vertificationCodes[req.body.user.email] === req.body.code){
+            res.status(400).send({status : 'error', msg : "Vertification code invalid."});
+            return;
+        }
         try {
-            const user = new Shop(req.body)
+            const user = new Shop(req.body.user);
             await user.save()
             const token = await user.generateAuthToken()
             //res.status(201).send({ user: user, token })

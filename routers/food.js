@@ -1,6 +1,7 @@
 const express = require('express')
 const stream = require('stream')
 const Food = require('../models/Food')
+const Shop = require('../models/Shop')
 const shop_auth = require('../middleware/shop_auth')
 const student_auth = require('../middleware/stu_auth')
 module.exports = (io, socketIDs) => {
@@ -235,6 +236,17 @@ module.exports = (io, socketIDs) => {
         console.log(food);
         await food.save();
         console.log("food saved.");
+        let shop = await Shop.findOne({_id : food.shopId});
+        let new_food = JSON.parse(JSON.stringify(food));
+            console.log(new_food);
+            //new_food._id = req.body._id;
+            new_food.shop = {
+                name : shop.name,
+                _id : shop._id,
+                status : shop.status
+            }
+
+        io.emit('food_change', new_food);
 
         res.status(201).send({ status: "success" });
     })

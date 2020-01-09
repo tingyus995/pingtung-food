@@ -30,7 +30,8 @@ io.on('connection', socket => {
             console.log("after auth: ");
             console.log(socketIDs);
         } catch (e) {
-            console.log(e);
+            //console.log(e);
+			console.log("An user initiated socket auth but failed.");
         }
     })
 
